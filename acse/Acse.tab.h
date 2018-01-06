@@ -63,19 +63,16 @@
      DO = 289,
      WHILE = 290,
      IF = 291,
-     ELSE = 292,
-     TYPE = 293,
-     IDENTIFIER = 294,
-     NUMBER = 295,
-     EVAL = 296,
-     UNLESS = 297,
-     FOREACH = 298,
-     FOR = 299,
-     SUM = 300,
-     OUT = 301,
-     OF = 302,
-     AS = 303,
-     NOT = 304
+     IIF = 292,
+     ELSE = 293,
+     TYPE = 294,
+     IDENTIFIER = 295,
+     NUMBER = 296,
+     EVAL = 297,
+     UNLESS = 298,
+     FOREACH = 299,
+     FOR = 300,
+     NOT = 301
    };
 #endif
 /* Tokens.  */
@@ -113,25 +110,22 @@
 #define DO 289
 #define WHILE 290
 #define IF 291
-#define ELSE 292
-#define TYPE 293
-#define IDENTIFIER 294
-#define NUMBER 295
-#define EVAL 296
-#define UNLESS 297
-#define FOREACH 298
-#define FOR 299
-#define SUM 300
-#define OUT 301
-#define OF 302
-#define AS 303
-#define NOT 304
+#define IIF 292
+#define ELSE 293
+#define TYPE 294
+#define IDENTIFIER 295
+#define NUMBER 296
+#define EVAL 297
+#define UNLESS 298
+#define FOREACH 299
+#define FOR 300
+#define NOT 301
 
 
 
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 103 "Acse.y"
+#line 101 "Acse.y"
 typedef union YYSTYPE {            
    int intval;
    char *svalue;
@@ -145,7 +139,7 @@ typedef union YYSTYPE {
    t_for_statement for_stmt;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 149 "Acse.tab.h"
+#line 143 "Acse.tab.h"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

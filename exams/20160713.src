@@ -1,0 +1,8 @@
+int i,j;
+i=5;
+j=8;
+iif (i=i+2; j==i){
+	j = i+1; 
+}
+write(i); // i is now 7
+write(j); // j is now i+1 -> 8

@@ -90,7 +90,6 @@ t_reg_allocator *RA;       /* Register allocator. It implements the "Linear scan
 
 t_io_infos *file_infos;    /* input and output files used by the compiler */
 
-
 %}
 
 %expect 1
@@ -128,7 +127,7 @@ t_io_infos *file_infos;    /* input and output files used by the compiler */
 
 %token <label> DO
 %token <while_stmt> WHILE
-%token <label> IF
+%token <label> IF IIF
 %token <label> ELSE
 %token <intval> TYPE
 %token <svalue> IDENTIFIER
@@ -144,7 +143,7 @@ t_io_infos *file_infos;    /* input and output files used by the compiler */
 %type <list> declaration_list
 %type <label> if_stmt
 %type <label> unless_statement
-
+%type <label> iif_stmt
 
 /*=========================================================================
                           OPERATOR PRECEDENCES
@@ -266,6 +265,7 @@ control_statement : if_statement         { /* does nothing */ }
 		      | foreach_statement			 { /* does nothing */ }
           | for_statement { /* does nothing */ }
           | return_statement SEMI      { /* does nothing */ }
+          | iif_statement { /* does nothing */}
 ;
 
 read_write_statement : read_statement  { /* does nothing */ }
@@ -298,6 +298,35 @@ assign_statement : IDENTIFIER LSQUARE exp RSQUARE ASSIGN exp
 			   free($1);
             }
 ;
+
+iif_statement:  iif_stmt{
+                  assignLabel(program, $1);
+              }
+              | iif_stmt ELSE{
+                $2 = newLabel(program);
+
+                gen_bt_instruction(program, $2, 0);
+                assignLabel(program, $1);
+              } code_block {
+                assignLabel(program, $2);
+              }
+;
+
+iif_stmt : IIF LPAR assign_statement SEMI exp RPAR {
+                    if($5.expression_type == IMMEDIATE)
+                      gen_load_immediate(program, $5.value);
+                    else
+                      gen_andb_instruction(program, $5.value, $5.value, $5.value, CG_DIRECT_ALL);
+                    
+                    $1 = newLabel(program);
+
+                    /* if `exp' returns FALSE, jump to label_end */
+                    gen_beq_instruction(program, $1, 0);
+                } code_block {
+                    $$ = $1;
+                }
+;
+
 
             
 if_statement   : if_stmt
