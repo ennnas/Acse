@@ -1,0 +1,61 @@
+
+
+*************************
+REGISTER ALLOCATION INFOS
+*************************
+AVAILABLE REGISTERS : 31 
+USED VARIABLES : 24 
+-------------------------
+LIVE_INTERVALS:
+	LIVE_INTERVAL of T4 : [0, 2] 
+	LIVE_INTERVAL of T5 : [1, 2] 
+	LIVE_INTERVAL of T6 : [3, 6] 
+	LIVE_INTERVAL of T7 : [5, 6] 
+	LIVE_INTERVAL of T8 : [7, 10] 
+	LIVE_INTERVAL of T9 : [9, 10] 
+	LIVE_INTERVAL of T10 : [11, 14] 
+	LIVE_INTERVAL of T11 : [13, 14] 
+	LIVE_INTERVAL of T3 : [15, 61] 
+	LIVE_INTERVAL of T12 : [17, 36] 
+	LIVE_INTERVAL of T13 : [20, 22] 
+	LIVE_INTERVAL of T14 : [22, 28] 
+	LIVE_INTERVAL of T15 : [24, 26] 
+	LIVE_INTERVAL of T16 : [26, 29] 
+	LIVE_INTERVAL of T1 : [28, 53] 
+	LIVE_INTERVAL of T2 : [29, 55] 
+	LIVE_INTERVAL of T17 : [30, 32] 
+	LIVE_INTERVAL of T18 : [32, 34] 
+	LIVE_INTERVAL of T19 : [41, 58] 
+	LIVE_INTERVAL of T20 : [44, 46] 
+	LIVE_INTERVAL of T21 : [46, 52] 
+	LIVE_INTERVAL of T22 : [48, 50] 
+	LIVE_INTERVAL of T23 : [50, 54] 
+-------------------------
+BINDINGS : 
+VAR T0 will be assigned to register R0 
+VAR T1 will be assigned to register R3 
+VAR T2 will be assigned to register R4 
+VAR T3 will be assigned to register R1 
+VAR T4 will be assigned to register R1 
+VAR T5 will be assigned to register R2 
+VAR T6 will be assigned to register R1 
+VAR T7 will be assigned to register R2 
+VAR T8 will be assigned to register R1 
+VAR T9 will be assigned to register R2 
+VAR T10 will be assigned to register R1 
+VAR T11 will be assigned to register R2 
+VAR T12 will be assigned to register R2 
+VAR T13 will be assigned to register R3 
+VAR T14 will be assigned to register R4 
+VAR T15 will be assigned to register R3 
+VAR T16 will be assigned to register R5 
+VAR T17 will be assigned to register R5 
+VAR T18 will be assigned to register R6 
+VAR T19 will be assigned to register R2 
+VAR T20 will be assigned to register R6 
+VAR T21 will be assigned to register R5 
+VAR T22 will be assigned to register R6 
+VAR T23 will be assigned to register R7 
+VAR T24 will be assigned to register R0 
+*************************
+

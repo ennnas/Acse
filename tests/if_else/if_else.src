@@ -1,0 +1,7 @@
+int i, b;
+
+read(b);
+
+for(i=0; i< b; i=i+1){
+	write(i);
+}
