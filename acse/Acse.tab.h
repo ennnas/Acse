@@ -71,11 +71,9 @@
      UNLESS = 297,
      FOREACH = 298,
      FOR = 299,
-     SUM = 300,
-     OUT = 301,
-     OF = 302,
-     AS = 303,
-     NOT = 304
+     PROTECT = 300,
+     WITH = 301,
+     NOT = 302
    };
 #endif
 /* Tokens.  */
@@ -121,17 +119,15 @@
 #define UNLESS 297
 #define FOREACH 298
 #define FOR 299
-#define SUM 300
-#define OUT 301
-#define OF 302
-#define AS 303
-#define NOT 304
+#define PROTECT 300
+#define WITH 301
+#define NOT 302
 
 
 
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 103 "Acse.y"
+#line 102 "Acse.y"
 typedef union YYSTYPE {            
    int intval;
    char *svalue;
@@ -145,7 +141,7 @@ typedef union YYSTYPE {
    t_for_statement for_stmt;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 149 "Acse.tab.h"
+#line 145 "Acse.tab.h"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

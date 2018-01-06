@@ -90,8 +90,7 @@ t_reg_allocator *RA;       /* Register allocator. It implements the "Linear scan
 
 t_io_infos *file_infos;    /* input and output files used by the compiler */
 
-t_axe_label *l_end, *l_cond; /* labels used in sum_statement */
-
+t_list* protectStack = NULL;
 %}
 
 %expect 1
@@ -138,7 +137,8 @@ t_axe_label *l_end, *l_cond; /* labels used in sum_statement */
 %token <label> UNLESS
 %token <foreach_stmt> FOREACH
 %token <for_stmt> FOR
-%token SUM OUT OF AS
+%token <label> PROTECT 
+%token <label> WITH
 
 %type <expr> exp
 %type <expr> assign_statement
@@ -146,7 +146,6 @@ t_axe_label *l_end, *l_cond; /* labels used in sum_statement */
 %type <list> declaration_list
 %type <label> if_stmt
 %type <label> unless_statement
-
 
 /*=========================================================================
                           OPERATOR PRECEDENCES
@@ -268,7 +267,7 @@ control_statement : if_statement         { /* does nothing */ }
 		      | foreach_statement			 { /* does nothing */ }
           | for_statement { /* does nothing */ }
           | return_statement SEMI      { /* does nothing */ }
-          | sum_statement SEMI { /* does nothing */ }
+          | protect_statement { /* does nothing */ }
 ;
 
 read_write_statement : read_statement  { /* does nothing */ }
@@ -302,51 +301,31 @@ assign_statement : IDENTIFIER LSQUARE exp RSQUARE ASSIGN exp
             }
 ;
 
-/* 2016-02-04 used in control_statement (265) */
-sum_statement: IDENTIFIER ASSIGN SUM IDENTIFIER COMMA IDENTIFIER OUT OF IDENTIFIER AS{
-          int i, j, counter_reg;
-          t_axe_variable* array;
-          t_axe_expression counter_exp;
+protect_statement: protect_stmt {
+                      t_axe_label *l = newLabel(program); // label used when code_block does not have any errors
+                      gen_bt_instruction(program, l, 0);
+                      assignLabel(program, (t_axe_label *)LDATA(getElementAt(protectStack,0)));
+                      gen_halt_instruction(program);
+                      protectStack = removeFirst(protectStack);
+                      assignLabel(program, l);
 
-          array = getVariable(program, $9);
-          if(!array->isArray)
-            exit(-1);
-          
-          int sum_location = get_symbol_location(program, $1, 0);
-          gen_addi_instruction(program, sum_location, REG_0, 0);
-
-          counter_reg = gen_load_immediate(program, array->arraySize - 2);
-          counter_exp = create_expression(counter_reg, REGISTER);
-
-          l_end = newLabel(program);
-          l_cond = assignNewLabel(program);
-
-          gen_andb_instruction(program, counter_reg, counter_reg, counter_reg, CG_DIRECT_ALL);
-          gen_blt_instruction(program, l_end, 0);
-
-          i = loadArrayElement(program, $9, counter_exp);
-          gen_addi_instruction(program, counter_reg, counter_reg, 1);
-          j = loadArrayElement(program, $9, counter_exp);
-
-          gen_subi_instruction(program, counter_reg, counter_reg, 2);
-
-          gen_addi_instruction(program, get_symbol_location(program, $4, 0), i, 0);
-          gen_addi_instruction(program, get_symbol_location(program, $6, 0), j, 0);
-
-
-        }
-        exp {
-          int sum_reg = get_symbol_location(program, $1, 0);
-          if($12.expression_type == IMMEDIATE)
-            gen_addi_instruction(program, sum_reg, sum_reg, $12.value);
-          else{
-            gen_add_instruction(program, sum_reg, sum_reg, $12.value, CG_DIRECT_ALL);
-          }
-          gen_bt_instruction(program, l_cond, 0);
-          assignLabel(program, l_end);
-        }
+                  }
+                  | protect_stmt WITH 
+                  {
+                      $2 = newLabel(program);
+                      gen_bt_instruction(program, $2, 0);
+                      assignLabel(program, (t_axe_label *)LDATA(getElementAt(protectStack,0)));
+                      protectStack = removeFirst(protectStack);
+                  } code_block {
+                      assignLabel(program, $2);
+                  }
 ;
 
+protect_stmt : PROTECT {
+            protectStack = addFirst(protectStack,newLabel(program));
+          } code_block {
+
+          };
 
             
 if_statement   : if_stmt
@@ -706,7 +685,18 @@ exp: NUMBER      { $$ = create_expression ($1, IMMEDIATE); }
                            $$ = handle_bin_numeric_op(program, $1, $3, MUL);
    }
    | exp DIV_OP exp     {
-                           $$ = handle_bin_numeric_op(program, $1, $3, DIV);
+                          /* If the protectStack is not null it means a protect statemnt is active */
+                          if(protectStack){
+                            int r = getNewRegister(program);
+                            gen_addi_instruction(program, r, REG_0, 0);
+                            
+                            /* check if the value of the second expression is equal to 0 and in that case sets Z to 1*/ 
+                            handle_binary_comparison(program, $3, create_expression(r, REGISTER), _EQ_);
+                            
+                            /* if the previous operations was true (Z=1) branch with not equal zero*/
+                            gen_bne_instruction(program, (t_axe_label *)LDATA(getElementAt(protectStack,0)),0);
+                          }
+                          $$ = handle_bin_numeric_op(program, $1, $3, DIV);
    }
    | exp LT exp      {
                         $$ = handle_binary_comparison (program, $1, $3, _LT_);
