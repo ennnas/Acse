@@ -107,6 +107,7 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
 "case"			  { return CASE; }
 "break"			  { return BREAK; }
 "default"		  { return DEFAULT; }
+"implicit"		  { return IMPLICIT; }
 
 {ID}              { yylval.svalue=strdup(yytext); return IDENTIFIER; }
 {DIGIT}+          { yylval.intval = atoi( yytext );

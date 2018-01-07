@@ -128,6 +128,7 @@ t_list *switchStack = NULL;
 %token READ
 %token WRITE
 %token CASE DEFAULT BREAK
+%token IMPLICIT
 
 %token <label> DO
 %token <while_stmt> WHILE
@@ -194,7 +195,14 @@ program  : var_declarations statements
 ;
 
 var_declarations : var_declarations var_declaration   { /* does nothing */ }
-                 | /* empty */                        { /* does nothing */ }
+                 | /* empty */  {
+                    /* the variable name should be always reachable */
+                    t_axe_declaration* implicit_decl = NULL;
+                    t_list* stub_list = NULL;
+                    implicit_decl = alloc_declaration(strdup("implicit"),0,0,0);
+                    stub_list = addElement(NULL,implicit_decl,-1);
+                    set_new_variables(program,INTEGER_TYPE,stub_list);
+                  }
 ;
 
 var_declaration   : TYPE declaration_list SEMI
@@ -261,6 +269,7 @@ statements  : statements statement       { /* does nothing */ }
 statement   : assign_statement SEMI      { /* does nothing */ }
             | control_statement          { /* does nothing */ }
             | read_write_statement SEMI  { /* does nothing */ }
+            | implicit_statement SEMI    { /* does nothing */ }
             | SEMI            { gen_nop_instruction(program); }
 ;
 
@@ -304,6 +313,19 @@ assign_statement : IDENTIFIER LSQUARE exp RSQUARE ASSIGN exp
 			   }
 			   free($1);
             }
+;
+
+implicit_statement : exp {
+                      t_axe_instruction *instr;
+                      int location;
+                      location = get_symbol_location(program, strdup("implicit"), 0);
+                      if($1.expression_type == IMMEDIATE){
+                        instr = gen_addi_instruction(program, location, REG_0, $1.value);
+                      }
+                      else {
+                        instr = gen_add_instruction(program, location, REG_0, $1.value, CG_DIRECT_ALL);
+                      }
+                  }
 ;
 
             
@@ -780,6 +802,11 @@ exp: NUMBER      { $$ = create_expression ($1, IMMEDIATE); }
                                  (program, exp_r0, $2, SUB);
                         }
                      }
+  | IMPLICIT {
+                    int location;
+                    location = get_symbol_location(program, strdup("implicit"), 0);
+                    $$ = create_expression(location, REGISTER);
+  }
   | exp DOLLAR exp AT exp {
                     int e_c = getNewRegister(program);
 

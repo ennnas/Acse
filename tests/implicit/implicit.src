@@ -1,0 +1,7 @@
+int a= 20;
+int b= 20;
+// la seguente espressione è uno statement,
+// il valore dell'espressione è assegnato
+// alla variabile implicita 'implicit'
+30;
+write(implicit);
