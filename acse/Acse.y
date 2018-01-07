@@ -129,6 +129,7 @@ t_list *switchStack = NULL;
 %token WRITE
 %token CASE DEFAULT BREAK 
 %token QMARK
+%token HAT
 
 %token <label> DO
 %token <while_stmt> WHILE
@@ -860,6 +861,36 @@ exp: NUMBER      { $$ = create_expression ($1, IMMEDIATE); }
           assignLabel(program, label_end);
           
           $$ = create_expression(cmpReg, REGISTER);
+  }
+  | exp HAT exp {
+          int index = getNewRegister(program);
+          int result = gen_load_immediate(program, 1); // result <- 1
+          int base = getNewRegister(program);
+          t_axe_label* label_cond = newLabel(program);
+          t_axe_label* label_end = newLabel(program);
+          
+          /* base <- $1.value */
+          if ($1.expression_type == IMMEDIATE)
+            gen_addi_instruction(program, base, REG_0, $1.value);
+          else
+            gen_add_instruction(program, base, REG_0, $1.value, CG_DIRECT_ALL);
+
+          /* index <- $3.value */
+          if ($3.expression_type == IMMEDIATE)
+            gen_addi_instruction(program, index, REG_0, $3.value);
+          else
+            gen_add_instruction(program, index, REG_0, $3.value, CG_DIRECT_ALL);
+
+          assignLabel(program, label_cond);
+          gen_beq_instruction(program, label_end, 0);
+
+          gen_mul_instruction(program, result, result, base, CG_DIRECT_ALL);
+          gen_subi_instruction(program, index, index, 1);
+
+          gen_bt_instruction(program, label_cond, 0);
+
+          assignLabel(program, label_end);
+          $$ = create_expression(result, REGISTER);
   }
 ;
 %%

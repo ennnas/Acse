@@ -1,0 +1,6 @@
+int a, b, c;
+read(a);
+read(b);
+ 
+c = a ^ b;
+write(c);

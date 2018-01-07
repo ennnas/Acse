@@ -64,21 +64,22 @@
      DEFAULT = 290,
      BREAK = 291,
      QMARK = 292,
-     DO = 293,
-     WHILE = 294,
-     IF = 295,
-     ELSE = 296,
-     TYPE = 297,
-     IDENTIFIER = 298,
-     NUMBER = 299,
-     EVAL = 300,
-     UNLESS = 301,
-     FOREACH = 302,
-     FOR = 303,
-     SWITCH = 304,
-     DOLLAR = 305,
-     AT = 306,
-     NOT = 307
+     HAT = 293,
+     DO = 294,
+     WHILE = 295,
+     IF = 296,
+     ELSE = 297,
+     TYPE = 298,
+     IDENTIFIER = 299,
+     NUMBER = 300,
+     EVAL = 301,
+     UNLESS = 302,
+     FOREACH = 303,
+     FOR = 304,
+     SWITCH = 305,
+     DOLLAR = 306,
+     AT = 307,
+     NOT = 308
    };
 #endif
 /* Tokens.  */
@@ -117,21 +118,22 @@
 #define DEFAULT 290
 #define BREAK 291
 #define QMARK 292
-#define DO 293
-#define WHILE 294
-#define IF 295
-#define ELSE 296
-#define TYPE 297
-#define IDENTIFIER 298
-#define NUMBER 299
-#define EVAL 300
-#define UNLESS 301
-#define FOREACH 302
-#define FOR 303
-#define SWITCH 304
-#define DOLLAR 305
-#define AT 306
-#define NOT 307
+#define HAT 293
+#define DO 294
+#define WHILE 295
+#define IF 296
+#define ELSE 297
+#define TYPE 298
+#define IDENTIFIER 299
+#define NUMBER 300
+#define EVAL 301
+#define UNLESS 302
+#define FOREACH 303
+#define FOR 304
+#define SWITCH 305
+#define DOLLAR 306
+#define AT 307
+#define NOT 308
 
 
 
@@ -152,7 +154,7 @@ typedef union YYSTYPE {
    t_switch_statement *switch_stmt;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 156 "Acse.tab.h"
+#line 158 "Acse.tab.h"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

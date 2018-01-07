@@ -91,6 +91,7 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
 "$"				  { return DOLLAR; }
 "@"				  { return AT; }
 "?"				  { return QMARK; }
+"^"				  { return HAT; }
 
 "do"              { return DO; }
 "else"            { return ELSE; }
