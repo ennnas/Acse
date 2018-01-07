@@ -75,7 +75,9 @@
      FOREACH = 301,
      FOR = 302,
      SWITCH = 303,
-     NOT = 304
+     DOLLAR = 304,
+     AT = 305,
+     NOT = 306
    };
 #endif
 /* Tokens.  */
@@ -125,7 +127,9 @@
 #define FOREACH 301
 #define FOR 302
 #define SWITCH 303
-#define NOT 304
+#define DOLLAR 304
+#define AT 305
+#define NOT 306
 
 
 
@@ -146,7 +150,7 @@ typedef union YYSTYPE {
    t_switch_statement *switch_stmt;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 150 "Acse.tab.h"
+#line 154 "Acse.tab.h"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

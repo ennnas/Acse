@@ -88,6 +88,8 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
 "&&"              { return ANDAND; }
 "||"              { return OROR; }
 ","               { return COMMA; }
+"$"				  { return DOLLAR; }
+"@"				  { return AT; }
 
 "do"              { return DO; }
 "else"            { return ELSE; }

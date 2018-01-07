@@ -1,0 +1,9 @@
+int a = 128;
+int b = 1;
+int c,d;
+
+c = a $ b @ 1;
+write(c);
+
+d = a $ b @ 30;
+write(d);

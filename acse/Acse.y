@@ -141,6 +141,7 @@ t_list *switchStack = NULL;
 %token <foreach_stmt> FOREACH
 %token <for_stmt> FOR
 %token <switch_stmt> SWITCH
+%token <label> DOLLAR AT
 
 %type <expr> exp
 %type <expr> assign_statement
@@ -779,6 +780,49 @@ exp: NUMBER      { $$ = create_expression ($1, IMMEDIATE); }
                                  (program, exp_r0, $2, SUB);
                         }
                      }
+  | exp DOLLAR exp AT exp {
+                    int e_c = getNewRegister(program);
+
+                    if( $5.value > 32)
+                      e_c = 0;
+                    else
+                      e_c = 32 - $5.value;
+
+                    int r_e2 = gen_load_immediate(program, 0); // r_e2 <- 0
+                    int r_index = gen_load_immediate(program, e_c); // r_index <-  e_c
+
+                    $4 = newLabel(program); // label end
+                    $2 = assignNewLabel(program); // label condition
+
+                    /* at the end of this loop r_e2 will have all 0's and (32 - k) 1's has l.s. digits */
+                    gen_beq_instruction(program, $4, 0); // if r_index is 0 jump to $4 label
+                    gen_shli_instruction(program, r_e2, r_e2, 1); // r_e2 <- shtl(r_e2)
+                    gen_addi_instruction(program, r_e2, r_e2, 1); /// r_e2 <- r_e2 + 1
+                    gen_subi_instruction(program, r_index, r_index, 1); // r_index <- r_index - 1
+                    gen_bt_instruction(program, $2, 0); // jump to $2 label
+                    assignLabel(program, $4);
+
+
+
+                    int r_e1 = getNewRegister(program);
+                    gen_notb_instruction(program, r_e1, r_e2); /*define mask for e1 through*/
+
+                    /*get r_e1 bits of exp1*/
+                    if ($1.expression_type == IMMEDIATE)
+                      gen_andb_instruction(program, r_e1, r_e1, gen_load_immediate(program, $1.value), CG_DIRECT_ALL);
+                    else
+                      gen_andb_instruction(program, r_e1, r_e1, $1.value, CG_DIRECT_ALL);
+
+                    /*get 32-e1 bits of exp2*/
+                    if ($3.expression_type == IMMEDIATE)
+                      gen_andb_instruction(program, r_e2, r_e2, gen_load_immediate(program, $3.value), CG_DIRECT_ALL);
+                    else
+                      gen_andb_instruction(program, r_e2, r_e2, $3.value, CG_DIRECT_ALL);
+                    
+                    int r = getNewRegister(program);
+                    gen_orb_instruction(program, r, r_e1, r_e2, CG_DIRECT_ALL);
+                    $$ = create_expression(r, REGISTER);
+                  }
 ;
 %%
 /*=========================================================================
