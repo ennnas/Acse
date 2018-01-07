@@ -1,0 +1,17 @@
+int x;
+int j=5;
+int k=4;
+
+x=1;
+write(x);
+switch (x) {
+	case 1:
+		x = j;
+		break;
+	case 2:
+		x = k;
+		break;
+	default:
+		x = j + k;
+}
+write(x);

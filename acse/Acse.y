@@ -90,6 +90,7 @@ t_reg_allocator *RA;       /* Register allocator. It implements the "Linear scan
 
 t_io_infos *file_infos;    /* input and output files used by the compiler */
 
+t_list *switchStack = NULL;
 
 %}
 
@@ -110,6 +111,7 @@ t_io_infos *file_infos;    /* input and output files used by the compiler */
    t_unless_statement unless_stmt;
    t_foreach_statement foreach_stmt;
    t_for_statement for_stmt;
+   t_switch_statement *switch_stmt;
 } 
 /*=========================================================================
                                TOKENS 
@@ -125,6 +127,7 @@ t_io_infos *file_infos;    /* input and output files used by the compiler */
 %token RETURN
 %token READ
 %token WRITE
+%token CASE DEFAULT BREAK
 
 %token <label> DO
 %token <while_stmt> WHILE
@@ -137,6 +140,7 @@ t_io_infos *file_infos;    /* input and output files used by the compiler */
 %token <label> UNLESS
 %token <foreach_stmt> FOREACH
 %token <for_stmt> FOR
+%token <switch_stmt> SWITCH
 
 %type <expr> exp
 %type <expr> assign_statement
@@ -266,6 +270,8 @@ control_statement : if_statement         { /* does nothing */ }
 		      | foreach_statement			 { /* does nothing */ }
           | for_statement { /* does nothing */ }
           | return_statement SEMI      { /* does nothing */ }
+          | switch_statement { /* does nothing */ }
+          | break_statement SEMI { /* does nothing */ }
 ;
 
 read_write_statement : read_statement  { /* does nothing */ }
@@ -478,7 +484,80 @@ for_statement : FOR { $1 = create_for_statement();}
         }
 ;
 
+switch_statement : SWITCH LPAR IDENTIFIER RPAR LBRACE {
+					
+					/* allocate memory for switch struct that will later be inserted into the stack */
+					$1 = (t_switch_statement *)malloc(sizeof(t_switch_statement));
+					$1->cmp_register = getNewRegister(program);
+					/* get_symbol_location returns a register where the $3 ID is stored */
+					gen_addi_instruction(program, $1->cmp_register, get_symbol_location(program,$3,0), 0);
+					
+					$1->begin_tests = newLabel(program);
+					$1->switch_end = newLabel(program);
+					
+					switchStack = addFirst(switchStack, $1);
+					gen_bt_instruction(program, $1->begin_tests, 0);
 
+					} switch_block RBRACE {
+
+						t_list *p;
+						int cmpReg;
+						assignLabel(program, $1->begin_tests);
+						cmpReg = getNewRegister(program);
+						p = $1->cases;
+						/* test all the cases */
+						while(p!=NULL){
+							/* cmpReg is 0 if the case is the correct one. p->data access an element of the list which is casted to a t_case_statement */
+							gen_subi_instruction(program,cmpReg, $1->cmp_register, ((t_case_statement *)p->data)->number);
+							gen_beq_instruction(program, ((t_case_statement*)p->data)->begin_case, 0);
+              p = p->next;
+						}
+						/* check if there is a default statement */
+						if($1->default_label!=NULL){
+							gen_bt_instruction(program, $1->default_label, 0);
+            }
+
+						assignLabel(program, $1->switch_end);
+						/* current switch has been executed, remove it from stack */
+						switchStack = removeFirst(switchStack);
+					}
+;
+
+switch_block : 	case_statements {
+					gen_bt_instruction(program, ((t_switch_statement*)LDATA(getElementAt(switchStack, 0)))->switch_end, 0);
+				}
+				| case_statements default_statement {
+					gen_bt_instruction(program, ((t_switch_statement*)LDATA(getElementAt(switchStack, 0)))->switch_end, 0);
+				}
+;
+
+case_statements : case_statements case_statement | case_statement;
+
+case_statement : CASE NUMBER COLON {
+          /* allocate memory for the test_case */
+					t_case_statement *c = (t_case_statement *)malloc(sizeof(t_case_statement));
+					c->number = $2; // assign number to c
+					c->begin_case = assignNewLabel(program);
+					/* update list of cases with c as last element */
+          ((t_switch_statement *)LDATA(getElementAt(switchStack, 0)))->cases = addLast(((t_switch_statement*)LDATA(getElementAt(switchStack, 0)))->cases, c);
+				} statements
+;
+
+default_statement : DEFAULT COLON {
+          ((t_switch_statement*)LDATA(getElementAt(switchStack, 0)))->default_label = assignNewLabel(program);
+					} statements
+;
+
+break_statement: BREAK {
+                  if(switchStack==NULL){
+                    abort();
+                  }
+                  else{
+                    /* jump to the end of the current active switch statement */
+                    gen_bt_instruction(program, ((t_switch_statement*)LDATA(getElementAt(switchStack, 0)))->switch_end, 0);
+                  }
+                }
+;
 
 return_statement : RETURN
             {

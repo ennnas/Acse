@@ -101,7 +101,10 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
 "write"           { return WRITE; }
 "eval"            { return EVAL; }
 "unless"          { return UNLESS; }
-
+"switch"		  { return SWITCH; }
+"case"			  { return CASE; }
+"break"			  { return BREAK; }
+"default"		  { return DEFAULT; }
 
 {ID}              { yylval.svalue=strdup(yytext); return IDENTIFIER; }
 {DIGIT}+          { yylval.intval = atoi( yytext );

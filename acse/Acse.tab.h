@@ -60,21 +60,21 @@
      RETURN = 286,
      READ = 287,
      WRITE = 288,
-     DO = 289,
-     WHILE = 290,
-     IF = 291,
-     ELSE = 292,
-     TYPE = 293,
-     IDENTIFIER = 294,
-     NUMBER = 295,
-     EVAL = 296,
-     UNLESS = 297,
-     FOREACH = 298,
-     FOR = 299,
-     SUM = 300,
-     OUT = 301,
-     OF = 302,
-     AS = 303,
+     CASE = 289,
+     DEFAULT = 290,
+     BREAK = 291,
+     DO = 292,
+     WHILE = 293,
+     IF = 294,
+     ELSE = 295,
+     TYPE = 296,
+     IDENTIFIER = 297,
+     NUMBER = 298,
+     EVAL = 299,
+     UNLESS = 300,
+     FOREACH = 301,
+     FOR = 302,
+     SWITCH = 303,
      NOT = 304
    };
 #endif
@@ -110,21 +110,21 @@
 #define RETURN 286
 #define READ 287
 #define WRITE 288
-#define DO 289
-#define WHILE 290
-#define IF 291
-#define ELSE 292
-#define TYPE 293
-#define IDENTIFIER 294
-#define NUMBER 295
-#define EVAL 296
-#define UNLESS 297
-#define FOREACH 298
-#define FOR 299
-#define SUM 300
-#define OUT 301
-#define OF 302
-#define AS 303
+#define CASE 289
+#define DEFAULT 290
+#define BREAK 291
+#define DO 292
+#define WHILE 293
+#define IF 294
+#define ELSE 295
+#define TYPE 296
+#define IDENTIFIER 297
+#define NUMBER 298
+#define EVAL 299
+#define UNLESS 300
+#define FOREACH 301
+#define FOR 302
+#define SWITCH 303
 #define NOT 304
 
 
@@ -143,9 +143,10 @@ typedef union YYSTYPE {
    t_unless_statement unless_stmt;
    t_foreach_statement foreach_stmt;
    t_for_statement for_stmt;
+   t_switch_statement *switch_stmt;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 149 "Acse.tab.h"
+#line 150 "Acse.tab.h"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
