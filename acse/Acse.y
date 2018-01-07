@@ -127,7 +127,8 @@ t_list *switchStack = NULL;
 %token RETURN
 %token READ
 %token WRITE
-%token CASE DEFAULT BREAK
+%token CASE DEFAULT BREAK 
+%token QMARK
 
 %token <label> DO
 %token <while_stmt> WHILE
@@ -829,6 +830,36 @@ exp: NUMBER      { $$ = create_expression ($1, IMMEDIATE); }
 
           q = handle_bin_numeric_op(program, $1, $3, DIV); // d <- a / b (integer)
           $$ = handle_bin_numeric_op(program, $1, handle_bin_numeric_op(program, $3, q, MUL), SUB);
+  }
+  | LPAR exp RPAR QMARK exp COLON exp {
+          t_axe_label *label_false = newLabel(program);
+          t_axe_label *label_end = newLabel(program);
+          int cmpReg = getNewRegister(program);
+
+          if($2.expression_type == IMMEDIATE)
+            $$ = $2.value ? $5 : $7;
+          else
+            gen_andb_instruction(program, $2.value, $2.value, $2.value, CG_DIRECT_ALL);
+
+          gen_beq_instruction(program, label_false, 0); 
+          
+          // If the condition is true
+          if($5.expression_type == IMMEDIATE)
+             gen_addi_instruction(program, cmpReg, REG_0, $5.value);
+          else
+            gen_add_instruction(program, cmpReg, REG_0, $5.value, CG_DIRECT_ALL);
+          
+          gen_bt_instruction(program, label_end, 0);
+
+          assignLabel(program, label_false);
+          // If the condition is false
+          if($7.expression_type == IMMEDIATE)
+             gen_addi_instruction(program, cmpReg, REG_0, $7.value);
+          else
+            gen_add_instruction(program, cmpReg, REG_0, $7.value, CG_DIRECT_ALL);
+          assignLabel(program, label_end);
+          
+          $$ = create_expression(cmpReg, REGISTER);
   }
 ;
 %%

@@ -90,6 +90,7 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
 ","               { return COMMA; }
 "$"				  { return DOLLAR; }
 "@"				  { return AT; }
+"?"				  { return QMARK; }
 
 "do"              { return DO; }
 "else"            { return ELSE; }
