@@ -1,0 +1,6 @@
+int a, b, c, d, e;
+read(a);
+read(b);
+ 
+c = (a + 7) % b;
+write(c);

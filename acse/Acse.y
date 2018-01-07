@@ -823,6 +823,13 @@ exp: NUMBER      { $$ = create_expression ($1, IMMEDIATE); }
                     gen_orb_instruction(program, r, r_e1, r_e2, CG_DIRECT_ALL);
                     $$ = create_expression(r, REGISTER);
                   }
+  | exp MOD_OP exp {
+          int q_reg = getNewRegister(program);
+          t_axe_expression q = create_expression(q_reg, REGISTER); // Quotient of the division
+
+          q = handle_bin_numeric_op(program, $1, $3, DIV); // d <- a / b (integer)
+          $$ = handle_bin_numeric_op(program, $1, handle_bin_numeric_op(program, $3, q, MUL), SUB);
+  }
 ;
 %%
 /*=========================================================================
