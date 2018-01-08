@@ -130,6 +130,7 @@ t_list *switchStack = NULL;
 %token CASE DEFAULT BREAK 
 %token QMARK
 %token HAT
+%token MERGE
 
 %token <label> DO
 %token <while_stmt> WHILE
@@ -305,6 +306,44 @@ assign_statement : IDENTIFIER LSQUARE exp RSQUARE ASSIGN exp
 					$$ = create_expression($3.value, REGISTER);
 			   }
 			   free($1);
+            }
+            | IDENTIFIER ASSIGN MERGE exp COMMA exp COMMA exp {
+              t_axe_label *label_end = newLabel(program);
+              t_axe_label *label_false = newLabel(program);
+              
+              int location;
+              location = get_symbol_location(program, $1, 0);
+
+              if($8.expression_type == IMMEDIATE)
+                gen_load_immediate(program, $8.value);
+              else
+                gen_andb_instruction(program, $8.value, $8.value, $8.value, CG_DIRECT_ALL);
+
+              gen_beq_instruction(program, label_false, 0);
+
+              if ($4.expression_type == IMMEDIATE) {
+                gen_addi_instruction(program, location, REG_0, $4.value);
+                $$ = create_expression($4.value, IMMEDIATE);
+              }
+              else{
+                gen_add_instruction(program, location, REG_0, $4.value, CG_DIRECT_ALL);
+                $$ = create_expression($4.value, REGISTER);
+              }
+
+              gen_bt_instruction(program, label_end, 0);
+
+              assignLabel(program, label_false);
+
+              if ($6.expression_type == IMMEDIATE) {
+                gen_addi_instruction(program, location, REG_0, $6.value);
+                $$ = create_expression($6.value, IMMEDIATE);
+              }
+              else{
+                gen_add_instruction(program, location, REG_0, $6.value, CG_DIRECT_ALL);
+                $$ = create_expression($6.value, REGISTER);
+              }
+
+              assignLabel(program, label_end);
             }
 ;
 
