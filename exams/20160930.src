@@ -1,0 +1,8 @@
+int a,b,c;
+a=7;
+b=2;
+c = merge a,b,a>b;
+write(c); /* this will print 7 */
+
+c = merge 2,3,0;
+write(c); /* this will print 3 */
