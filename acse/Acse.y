@@ -130,6 +130,7 @@ t_list *switchStack = NULL;
 %token CASE DEFAULT BREAK 
 %token QMARK
 %token HAT
+%token BIT
 
 %token <label> DO
 %token <while_stmt> WHILE
@@ -891,6 +892,44 @@ exp: NUMBER      { $$ = create_expression ($1, IMMEDIATE); }
 
           assignLabel(program, label_end);
           $$ = create_expression(result, REGISTER);
+  }
+  | LPAR BIT RPAR IDENTIFIER {
+    t_axe_variable *array = getVariable(program, $4);
+
+    if( !array->isArray ){
+      $$ = create_expression(array->init_val, IMMEDIATE);
+    }
+    else {
+      int index_reg = gen_load_immediate(program, array->arraySize-1);
+      t_axe_expression index = create_expression(index_reg, REGISTER);
+
+      /* 1 if the size of the array is smaller or equal to 31 - 0 otherwise */
+      handle_binary_comparison(program, index, create_expression(31, IMMEDIATE), _LTEQ_);
+      t_axe_label* l = newLabel(program);
+      
+      gen_bne_instruction(program, l, 0);
+      gen_addi_instruction(program, index_reg, REG_0, 31); // set index value to 31
+      
+      assignLabel(program, l);
+      /* Initialize the result register with 0 */
+      int result_reg = gen_load_immediate(program, 0);
+      t_axe_expression result = create_expression(result_reg, REGISTER);
+
+      t_axe_label* test = assignNewLabel(program);
+      t_axe_label* end = newLabel(program);
+      
+      handle_binary_comparison(program, index, create_expression(0, IMMEDIATE), _LT_);
+      gen_bne_instruction(program, end, 0);
+      
+      gen_shli_instruction(program, result_reg, result_reg, 1);
+      int v = loadArrayElement(program, $4, index);
+      t_axe_expression cmp = handle_binary_comparison(program, create_expression(v, REGISTER), create_expression(0, IMMEDIATE), _NOTEQ_);
+      gen_orb_instruction(program, result_reg, result_reg, cmp.value, CG_DIRECT_ALL);   
+      gen_subi_instruction(program, index_reg, index_reg, 1);
+      gen_bt_instruction(program, test, 0);
+      assignLabel(program, end);
+      $$ = result;
+    }
   }
 ;
 %%
