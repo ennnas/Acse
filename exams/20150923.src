@@ -1,0 +1,13 @@
+int elem, v[3];
+
+v[0]=1;
+v[1]=2;
+v[2]=5;
+
+for (elem in v where elem>2 ) { 
+	write(elem*5);
+}
+
+for (elem in v) { 
+	write(elem*5);
+}

@@ -109,6 +109,8 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
 "case"			  { return CASE; }
 "break"			  { return BREAK; }
 "default"		  { return DEFAULT; }
+"in"			  { return IN; }
+"where"			  { return WHERE; }
 
 {ID}              { yylval.svalue=strdup(yytext); return IDENTIFIER; }
 {DIGIT}+          { yylval.intval = atoi( yytext );

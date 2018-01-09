@@ -130,6 +130,7 @@ t_list *switchStack = NULL;
 %token CASE DEFAULT BREAK 
 %token QMARK
 %token HAT
+%token WHERE IN
 
 %token <label> DO
 %token <while_stmt> WHILE
@@ -141,7 +142,7 @@ t_list *switchStack = NULL;
 %token <unless_stmt> EVAL
 %token <label> UNLESS
 %token <foreach_stmt> FOREACH
-%token <for_stmt> FOR
+%token <foreach_stmt> FOR
 %token <switch_stmt> SWITCH
 %token <label> DOLLAR AT
 
@@ -151,7 +152,7 @@ t_list *switchStack = NULL;
 %type <list> declaration_list
 %type <label> if_stmt
 %type <label> unless_statement
-
+%type <expr> where_block 
 
 /*=========================================================================
                           OPERATOR PRECEDENCES
@@ -271,7 +272,7 @@ control_statement : if_statement         { /* does nothing */ }
           | while_statement            { /* does nothing */ }
           | do_while_statement SEMI    { /* does nothing */ }
 		      | foreach_statement			 { /* does nothing */ }
-          | for_statement { /* does nothing */ }
+          | forin_statement { /* does nothing */ }
           | return_statement SEMI      { /* does nothing */ }
           | switch_statement { /* does nothing */ }
           | break_statement SEMI { /* does nothing */ }
@@ -465,26 +466,48 @@ foreach_statement : FOREACH
 			}
 ;
 
-for_statement : FOR { $1 = create_for_statement();}
-        LPAR assign_list SEMI {$1.label_exp = assignNewLabel(program);}
-        
-        exp SEMI {
-          $1.label_end = newLabel(program);
-          gen_beq_instruction(program, $1.label_end, 0);
-          $1.label_code = newLabel(program);
-          gen_bt_instruction(program, $1.label_code, 0);
-          $1.label_epilogue = assignNewLabel(program);
-        }
-        
-        assign_list RPAR{
-          gen_bt_instruction(program, $1.label_exp, 0);
-          assignLabel(program, $1.label_code);
-        }
+forin_statement : FOR
+      {
+        $1.counter = getNewRegister(program);
+        gen_addi_instruction(program, $1.counter, REG_0, 0);
+        $1.iteration = newLabel(program);
+        $1.end = newLabel(program);
+        $1.increment = newLabel(program);
+      }
+      LPAR IDENTIFIER IN IDENTIFIER //LPAR IDENTIFIER COLON IDENTIFIER RPAR
+      {
+        int var_location = get_symbol_location(program, $4, 0);
+        t_axe_variable * array_declaration = getVariable(program, $6);
 
-        code_block{
-          gen_bt_instruction(program, $1.label_epilogue, 0);
-          assignLabel(program, $1.label_end);
-        }
+        assignLabel(program, $1.iteration);
+        int temp_register = getNewRegister(program);
+        gen_subi_instruction(program, temp_register, $1.counter, array_declaration->arraySize);
+        gen_beq_instruction(program, $1.end, 0);
+
+        int new_value = loadArrayElement(program, $6, create_expression($1.counter, REGISTER));
+        gen_add_instruction(program, var_location, REG_0, new_value, CG_DIRECT_ALL);
+      } where_block RPAR {
+        
+        if ($8.expression_type == IMMEDIATE)
+            gen_load_immediate(program, $8.value);
+        else
+            gen_andb_instruction(program, $8.value,
+                $8.value, $8.value, CG_DIRECT_ALL);
+
+        gen_beq_instruction(program, $1.increment ,0);
+    
+      }
+      code_block
+      {
+        assignLabel(program, $1.increment);
+        gen_addi_instruction(program, $1.counter, $1.counter, 1);
+        gen_bt_instruction(program, $1.iteration, 0);
+        assignLabel(program, $1.end);
+      }
+;
+
+where_block : WHERE exp   { $$ = $2 }
+            | /* empty */ { $$ = create_expression(1, IMMEDIATE)  }
 ;
 
 switch_statement : SWITCH LPAR IDENTIFIER RPAR LBRACE {

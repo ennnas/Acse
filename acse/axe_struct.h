@@ -125,6 +125,7 @@ typedef struct t_foreach_statement {
 	int counter;
 	t_axe_label * iteration;
 	t_axe_label * end;
+  t_axe_label * increment;
 } t_foreach_statement;
 
 typedef struct t_for_statement {
