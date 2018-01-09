@@ -1,0 +1,16 @@
+int a,b; 
+a = 1;
+b = 6;
+count {
+	when (3){ 
+		write(2);
+	},
+	when (3){
+		write(b);
+		if(a+b==7){ 
+			b=b+1;
+		} 
+	},
+	when (b<0){ ;} 
+} into a;
+write(a);
