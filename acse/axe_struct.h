@@ -150,6 +150,13 @@ typedef struct t_case_statement
 	t_axe_label *begin_case;
 } t_case_statement;
 
+
+
+typedef struct  t_when_statement {
+  int eval;
+  t_axe_label *begin_when;
+}t_when_statement;
+
 /* create a label */
 extern t_axe_label * alloc_label(int value);
 

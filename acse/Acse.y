@@ -112,6 +112,7 @@ t_list *switchStack = NULL;
    t_foreach_statement foreach_stmt;
    t_for_statement for_stmt;
    t_switch_statement *switch_stmt;
+   t_when_statement when_stmt;
 } 
 /*=========================================================================
                                TOKENS 
@@ -130,6 +131,7 @@ t_list *switchStack = NULL;
 %token CASE DEFAULT BREAK 
 %token QMARK
 %token HAT
+%token COUNT INTO
 
 %token <label> DO
 %token <while_stmt> WHILE
@@ -144,6 +146,7 @@ t_list *switchStack = NULL;
 %token <for_stmt> FOR
 %token <switch_stmt> SWITCH
 %token <label> DOLLAR AT
+%token <when_stmt> WHEN
 
 %type <expr> exp
 %type <expr> assign_statement
@@ -152,7 +155,8 @@ t_list *switchStack = NULL;
 %type <label> if_stmt
 %type <label> unless_statement
 
-
+%type <intval> when_list
+%type <intval> when_statement
 /*=========================================================================
                           OPERATOR PRECEDENCES
  =========================================================================*/
@@ -275,6 +279,7 @@ control_statement : if_statement         { /* does nothing */ }
           | return_statement SEMI      { /* does nothing */ }
           | switch_statement { /* does nothing */ }
           | break_statement SEMI { /* does nothing */ }
+          | count_statement SEMI       { /* does nothing */ }
 ;
 
 read_write_statement : read_statement  { /* does nothing */ }
@@ -307,7 +312,6 @@ assign_statement : IDENTIFIER LSQUARE exp RSQUARE ASSIGN exp
 			   free($1);
             }
 ;
-
             
 if_statement   : if_stmt
                {
@@ -559,6 +563,40 @@ break_statement: BREAK {
                     /* jump to the end of the current active switch statement */
                     gen_bt_instruction(program, ((t_switch_statement*)LDATA(getElementAt(switchStack, 0)))->switch_end, 0);
                   }
+                }
+;
+
+count_statement: COUNT LBRACE when_list RBRACE INTO IDENTIFIER {
+                      gen_add_instruction(program,get_symbol_location(program,$6,0),$3,REG_0,CG_DIRECT_ALL);
+                  }
+;
+
+
+when_list : when_list COMMA when_statement {
+            /* assign the value of list $1 to the parent node and sum the value of the statement */
+            $$ = $1;
+            gen_add_instruction(program, $1, $1, $3, CG_DIRECT_ALL);
+          }
+          | when_statement{
+            $$ = $1;
+          }
+;
+
+when_statement : WHEN LPAR exp RPAR LBRACE{
+                  t_axe_expression normalized = $3;
+                  if($3.expression_type == IMMEDIATE) {
+                      normalized.value = gen_load_immediate(program, $3.value);
+                      normalized.expression_type = REGISTER;
+                  } 
+                  
+                  t_axe_expression sum = handle_binary_comparison(program, normalized , create_expression(0,IMMEDIATE) ,_GT_);
+                  $1.eval = sum.value;
+                  $1.begin_when = newLabel(program);
+                  gen_beq_instruction(program, $1.begin_when,0);
+
+                } statements RBRACE{
+                    $$ = $1.eval;
+                    assignLabel(program, $1.begin_when);
                 }
 ;
 
