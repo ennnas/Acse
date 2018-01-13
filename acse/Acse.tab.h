@@ -65,21 +65,24 @@
      BREAK = 291,
      QMARK = 292,
      HAT = 293,
-     DO = 294,
-     WHILE = 295,
-     IF = 296,
-     ELSE = 297,
-     TYPE = 298,
-     IDENTIFIER = 299,
-     NUMBER = 300,
-     EVAL = 301,
-     UNLESS = 302,
-     FOREACH = 303,
-     FOR = 304,
-     SWITCH = 305,
-     DOLLAR = 306,
-     AT = 307,
-     NOT = 308
+     SUM = 294,
+     WEIGHTED = 295,
+     BY = 296,
+     DO = 297,
+     WHILE = 298,
+     IF = 299,
+     ELSE = 300,
+     TYPE = 301,
+     IDENTIFIER = 302,
+     NUMBER = 303,
+     EVAL = 304,
+     UNLESS = 305,
+     FOREACH = 306,
+     FOR = 307,
+     SWITCH = 308,
+     DOLLAR = 309,
+     AT = 310,
+     NOT = 311
    };
 #endif
 /* Tokens.  */
@@ -119,21 +122,24 @@
 #define BREAK 291
 #define QMARK 292
 #define HAT 293
-#define DO 294
-#define WHILE 295
-#define IF 296
-#define ELSE 297
-#define TYPE 298
-#define IDENTIFIER 299
-#define NUMBER 300
-#define EVAL 301
-#define UNLESS 302
-#define FOREACH 303
-#define FOR 304
-#define SWITCH 305
-#define DOLLAR 306
-#define AT 307
-#define NOT 308
+#define SUM 294
+#define WEIGHTED 295
+#define BY 296
+#define DO 297
+#define WHILE 298
+#define IF 299
+#define ELSE 300
+#define TYPE 301
+#define IDENTIFIER 302
+#define NUMBER 303
+#define EVAL 304
+#define UNLESS 305
+#define FOREACH 306
+#define FOR 307
+#define SWITCH 308
+#define DOLLAR 309
+#define AT 310
+#define NOT 311
 
 
 
@@ -154,7 +160,7 @@ typedef union YYSTYPE {
    t_switch_statement *switch_stmt;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 158 "Acse.tab.h"
+#line 164 "Acse.tab.h"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

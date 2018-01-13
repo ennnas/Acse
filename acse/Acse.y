@@ -130,6 +130,7 @@ t_list *switchStack = NULL;
 %token CASE DEFAULT BREAK 
 %token QMARK
 %token HAT
+%token SUM WEIGHTED BY
 
 %token <label> DO
 %token <while_stmt> WHILE
@@ -151,7 +152,7 @@ t_list *switchStack = NULL;
 %type <list> declaration_list
 %type <label> if_stmt
 %type <label> unless_statement
-
+%type <list> exp_list
 
 /*=========================================================================
                           OPERATOR PRECEDENCES
@@ -307,7 +308,6 @@ assign_statement : IDENTIFIER LSQUARE exp RSQUARE ASSIGN exp
 			   free($1);
             }
 ;
-
             
 if_statement   : if_stmt
                {
@@ -892,6 +892,52 @@ exp: NUMBER      { $$ = create_expression ($1, IMMEDIATE); }
           assignLabel(program, label_end);
           $$ = create_expression(result, REGISTER);
   }
+  | SUM WEIGHTED BY IDENTIFIER LSQUARE exp_list RSQUARE {
+        int result, temp_register;
+        t_axe_expression counter;
+        /* getting a register where to store the result */
+        result = gen_load_immediate(program, 0);
+        /* initialize the counter to 0 */
+        counter = create_expression(0, IMMEDIATE);
+
+        temp_register = getNewRegister(program);
+
+        /* iterate over the exp_list */
+        while($6!=NULL){
+          /* t <- v[i] */
+          temp_register = loadArrayElement(program, $4, counter);
+          /* t <- t * w[i] */
+          gen_mul_instruction(program, temp_register, temp_register, (*(int*)$6->data), CG_DIRECT_ALL);
+          /* r <- r + t */
+          gen_add_instruction(program, result, temp_register, result, CG_DIRECT_ALL);
+          /* i++ */
+          counter.value++;
+          $6 = $6->next;
+        }
+        $$ = create_expression(result, REGISTER);
+  }
+;
+
+exp_list : exp_list COMMA exp {
+            int *temp_register = (int *) malloc(sizeof(int));
+            if($3.expression_type==IMMEDIATE)
+              *temp_register =  gen_load_immediate(program, $3.value);
+            else
+              *temp_register = $3.value;
+
+            $1 = addLast($1, temp_register);
+            $$ = $1;
+          }
+          | exp {
+            t_list * head = NULL;
+            int *temp_register = (int *) malloc(sizeof(int));
+            if($1.expression_type==IMMEDIATE)
+              *temp_register = gen_load_immediate(program, $1.value);
+            else
+              *temp_register = $1.value;
+            head = addLast(head, temp_register);
+            $$ = head;
+          }
 ;
 %%
 /*=========================================================================

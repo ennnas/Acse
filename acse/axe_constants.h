@@ -143,6 +143,8 @@
 #define IMMEDIATE 0
 #define REGISTER 1
 #define INVALID_EXPRESSION -1
+#define INFINITY 1
+#define NaN -1
 
 /* binary comparison constants */
 #define _LT_ 0
