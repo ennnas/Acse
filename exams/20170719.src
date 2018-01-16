@@ -1,0 +1,9 @@
+int a=3;
+int b=2;
+if (a*b == a [*] b) {
+	write (1); 
+}
+else {
+	write(0); 
+}
+write(a[*]-b);

@@ -119,7 +119,7 @@ t_list *switchStack = NULL;
 %start program
 
 %token LBRACE RBRACE LPAR RPAR LSQUARE RSQUARE
-%token SEMI COLON PLUS MINUS MUL_OP DIV_OP MOD_OP
+%token SEMI COLON PLUS MINUS MUL_OP SMUL_OP DIV_OP MOD_OP
 %token AND_OP OR_OP NOT_OP
 %token ASSIGN LT GT SHL_OP SHR_OP EQ NOTEQ LTEQ GTEQ
 %token ANDAND OROR
@@ -167,7 +167,7 @@ t_list *switchStack = NULL;
 %left LT GT LTEQ GTEQ
 %left SHL_OP SHR_OP
 %left MINUS PLUS
-%left MUL_OP DIV_OP
+%left MUL_OP DIV_OP SMUL_OP
 %left IF ELSE
 %right NOT
 
@@ -891,6 +891,41 @@ exp: NUMBER      { $$ = create_expression ($1, IMMEDIATE); }
 
           assignLabel(program, label_end);
           $$ = create_expression(result, REGISTER);
+  }
+  | exp SMUL_OP exp {
+    int counter = getNewRegister(program); 
+    int result = gen_load_immediate(program, 0);
+    int negative = 1; // false
+
+    t_axe_label *l_iter = newLabel(program);
+    t_axe_label *l_end  = newLabel(program);
+
+    if($1.expression_type == IMMEDIATE)
+      gen_addi_instruction(program, counter, REG_0, $1.value);
+    else
+      gen_add_instruction(program, counter, REG_0, $1.value, CG_DIRECT_ALL);
+
+    gen_bgt_instruction(program, l_iter, 0);
+    /* if $1.value is negavite counter = - counter */
+    gen_sub_instruction(program, counter, REG_0, counter, CG_DIRECT_ALL);
+    negative = 0;
+    assignLabel(program, l_iter);
+    gen_beq_instruction(program, l_end, 0);
+
+    if($3.expression_type == IMMEDIATE)
+      gen_addi_instruction(program, result, result, $3.value);
+    else
+      gen_add_instruction(program, result, result, $3.value, CG_DIRECT_ALL);
+
+    gen_subi_instruction(program, counter, counter, 1);
+    gen_bt_instruction(program, l_iter, 0);
+
+    assignLabel(program, l_end);
+    
+    if (negative)
+      gen_sub_instruction(program, result, REG_0, result, CG_DIRECT_ALL);
+
+    $$ = create_expression(result, REGISTER);
   }
 ;
 %%

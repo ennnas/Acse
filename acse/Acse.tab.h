@@ -40,46 +40,47 @@
      PLUS = 266,
      MINUS = 267,
      MUL_OP = 268,
-     DIV_OP = 269,
-     MOD_OP = 270,
-     AND_OP = 271,
-     OR_OP = 272,
-     NOT_OP = 273,
-     ASSIGN = 274,
-     LT = 275,
-     GT = 276,
-     SHL_OP = 277,
-     SHR_OP = 278,
-     EQ = 279,
-     NOTEQ = 280,
-     LTEQ = 281,
-     GTEQ = 282,
-     ANDAND = 283,
-     OROR = 284,
-     COMMA = 285,
-     RETURN = 286,
-     READ = 287,
-     WRITE = 288,
-     CASE = 289,
-     DEFAULT = 290,
-     BREAK = 291,
-     QMARK = 292,
-     HAT = 293,
-     DO = 294,
-     WHILE = 295,
-     IF = 296,
-     ELSE = 297,
-     TYPE = 298,
-     IDENTIFIER = 299,
-     NUMBER = 300,
-     EVAL = 301,
-     UNLESS = 302,
-     FOREACH = 303,
-     FOR = 304,
-     SWITCH = 305,
-     DOLLAR = 306,
-     AT = 307,
-     NOT = 308
+     SMUL_OP = 269,
+     DIV_OP = 270,
+     MOD_OP = 271,
+     AND_OP = 272,
+     OR_OP = 273,
+     NOT_OP = 274,
+     ASSIGN = 275,
+     LT = 276,
+     GT = 277,
+     SHL_OP = 278,
+     SHR_OP = 279,
+     EQ = 280,
+     NOTEQ = 281,
+     LTEQ = 282,
+     GTEQ = 283,
+     ANDAND = 284,
+     OROR = 285,
+     COMMA = 286,
+     RETURN = 287,
+     READ = 288,
+     WRITE = 289,
+     CASE = 290,
+     DEFAULT = 291,
+     BREAK = 292,
+     QMARK = 293,
+     HAT = 294,
+     DO = 295,
+     WHILE = 296,
+     IF = 297,
+     ELSE = 298,
+     TYPE = 299,
+     IDENTIFIER = 300,
+     NUMBER = 301,
+     EVAL = 302,
+     UNLESS = 303,
+     FOREACH = 304,
+     FOR = 305,
+     SWITCH = 306,
+     DOLLAR = 307,
+     AT = 308,
+     NOT = 309
    };
 #endif
 /* Tokens.  */
@@ -94,46 +95,47 @@
 #define PLUS 266
 #define MINUS 267
 #define MUL_OP 268
-#define DIV_OP 269
-#define MOD_OP 270
-#define AND_OP 271
-#define OR_OP 272
-#define NOT_OP 273
-#define ASSIGN 274
-#define LT 275
-#define GT 276
-#define SHL_OP 277
-#define SHR_OP 278
-#define EQ 279
-#define NOTEQ 280
-#define LTEQ 281
-#define GTEQ 282
-#define ANDAND 283
-#define OROR 284
-#define COMMA 285
-#define RETURN 286
-#define READ 287
-#define WRITE 288
-#define CASE 289
-#define DEFAULT 290
-#define BREAK 291
-#define QMARK 292
-#define HAT 293
-#define DO 294
-#define WHILE 295
-#define IF 296
-#define ELSE 297
-#define TYPE 298
-#define IDENTIFIER 299
-#define NUMBER 300
-#define EVAL 301
-#define UNLESS 302
-#define FOREACH 303
-#define FOR 304
-#define SWITCH 305
-#define DOLLAR 306
-#define AT 307
-#define NOT 308
+#define SMUL_OP 269
+#define DIV_OP 270
+#define MOD_OP 271
+#define AND_OP 272
+#define OR_OP 273
+#define NOT_OP 274
+#define ASSIGN 275
+#define LT 276
+#define GT 277
+#define SHL_OP 278
+#define SHR_OP 279
+#define EQ 280
+#define NOTEQ 281
+#define LTEQ 282
+#define GTEQ 283
+#define ANDAND 284
+#define OROR 285
+#define COMMA 286
+#define RETURN 287
+#define READ 288
+#define WRITE 289
+#define CASE 290
+#define DEFAULT 291
+#define BREAK 292
+#define QMARK 293
+#define HAT 294
+#define DO 295
+#define WHILE 296
+#define IF 297
+#define ELSE 298
+#define TYPE 299
+#define IDENTIFIER 300
+#define NUMBER 301
+#define EVAL 302
+#define UNLESS 303
+#define FOREACH 304
+#define FOR 305
+#define SWITCH 306
+#define DOLLAR 307
+#define AT 308
+#define NOT 309
 
 
 
@@ -154,7 +156,7 @@ typedef union YYSTYPE {
    t_switch_statement *switch_stmt;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 158 "Acse.tab.h"
+#line 160 "Acse.tab.h"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

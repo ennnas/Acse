@@ -92,6 +92,7 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
 "@"				  { return AT; }
 "?"				  { return QMARK; }
 "^"				  { return HAT; }
+"[*]"			  { return SMUL_OP; }
 
 "do"              { return DO; }
 "else"            { return ELSE; }
