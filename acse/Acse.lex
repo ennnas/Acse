@@ -110,6 +110,7 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
 "break"			  { return BREAK; }
 "default"		  { return DEFAULT; }
 "cond"			  { return COND; }
+"=a="			  { return EQARRAY; }
 
 {ID}              { yylval.svalue=strdup(yytext); return IDENTIFIER; }
 {DIGIT}+          { yylval.intval = atoi( yytext );

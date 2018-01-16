@@ -124,7 +124,7 @@ t_list *condStack = NULL;
 %token LBRACE RBRACE LPAR RPAR LSQUARE RSQUARE
 %token SEMI COLON PLUS MINUS MUL_OP DIV_OP MOD_OP
 %token AND_OP OR_OP NOT_OP
-%token ASSIGN LT GT SHL_OP SHR_OP EQ NOTEQ LTEQ GTEQ
+%token ASSIGN EQARRAY LT GT SHL_OP SHR_OP EQ NOTEQ LTEQ GTEQ
 %token ANDAND OROR
 %token COMMA
 %token RETURN
@@ -162,7 +162,7 @@ t_list *condStack = NULL;
  =========================================================================*/
 
 %left COMMA
-%left ASSIGN
+%left ASSIGN EQARRAY
 %left OROR
 %left ANDAND
 %left OR_OP
@@ -930,6 +930,48 @@ exp: NUMBER      { $$ = create_expression ($1, IMMEDIATE); }
 
           assignLabel(program, label_end);
           $$ = create_expression(result, REGISTER);
+  }
+  | IDENTIFIER EQARRAY IDENTIFIER {
+    t_axe_variable *id1 = getVariable(program, $1);
+    if(!id1->isArray) exit(-1);
+
+    t_axe_variable *id2 = getVariable(program, $3);
+    if(!id2->isArray) exit(-1);
+
+    if(id1->arraySize != id2->arraySize)
+      $$ = create_expression(0, IMMEDIATE);
+
+    else{
+      int idx = id1->arraySize;
+      int e1 = getNewRegister(program); // later used to store elements from first array
+      int e2 = getNewRegister(program); // later used to store elements from second array
+
+      t_axe_label *l_end = newLabel(program);
+      t_axe_label *l_diff = newLabel(program); // label used in case the two array are different
+      t_axe_label *l_iter = assignNewLabel(program);
+
+      e1 = loadArrayElement(program, $1, create_expression(idx, IMMEDIATE));
+      e2 = loadArrayElement(program, $3, create_expression(idx, IMMEDIATE));
+
+      gen_sub_instruction(program, e1, e1, e2, CG_DIRECT_ALL);
+      
+      /* if it is not zero e1 != e2 */
+      gen_bne_instruction(program, l_diff, 0);
+
+      gen_subi_instruction(program, idx, idx, 1);
+
+      gen_bne_instruction(program, l_iter, 0);
+
+      $$ = create_expression(0, IMMEDIATE); // true
+      gen_bt_instruction(program, l_end, 0);
+
+      assignLabel(program, l_diff);
+      $$ = create_expression(1, IMMEDIATE); // false
+
+      assignLabel(program, l_end);
+      
+    }
+
   }
 ;
 %%
