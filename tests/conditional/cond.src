@@ -1,0 +1,6 @@
+int a, b, c, d, e;
+read(a);
+read(b);
+ 
+d = (a < b/2) ? 7 : 5;
+write(d);

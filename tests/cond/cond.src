@@ -1,6 +1,21 @@
-int a, b, c, d, e;
-read(a);
-read(b);
- 
-d = (a < b/2) ? 7 : 5;
-write(d);
+int x,y;
+read(x);
+read(y);
+
+
+cond {
+	case x: x=0;
+	
+	case y>0: 
+		y=y+x; 
+		x=1; 
+	
+	case x+y: 
+		x=0; 
+		y=0; 
+	
+	default: 
+		y=1;
+}
+write(x);
+write(y);

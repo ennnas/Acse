@@ -92,6 +92,8 @@ t_io_infos *file_infos;    /* input and output files used by the compiler */
 
 t_list *switchStack = NULL;
 
+t_list *condStack = NULL;
+
 %}
 
 %expect 1
@@ -112,6 +114,7 @@ t_list *switchStack = NULL;
    t_foreach_statement foreach_stmt;
    t_for_statement for_stmt;
    t_switch_statement *switch_stmt;
+   t_cond_statement *cond_stmt;
 } 
 /*=========================================================================
                                TOKENS 
@@ -144,6 +147,7 @@ t_list *switchStack = NULL;
 %token <for_stmt> FOR
 %token <switch_stmt> SWITCH
 %token <label> DOLLAR AT
+%token <cond_stmt> COND
 
 %type <expr> exp
 %type <expr> assign_statement
@@ -275,6 +279,7 @@ control_statement : if_statement         { /* does nothing */ }
           | return_statement SEMI      { /* does nothing */ }
           | switch_statement { /* does nothing */ }
           | break_statement SEMI { /* does nothing */ }
+          | cond_statement { /* does nothing */ }
 ;
 
 read_write_statement : read_statement  { /* does nothing */ }
@@ -544,10 +549,31 @@ case_statement : CASE NUMBER COLON {
 					/* update list of cases with c as last element */
           ((t_switch_statement *)LDATA(getElementAt(switchStack, 0)))->cases = addLast(((t_switch_statement*)LDATA(getElementAt(switchStack, 0)))->cases, c);
 				} statements
+        | CASE exp COLON {
+          /* checko if expression type and if the exp is true or false */ 
+          if ($2.expression_type == IMMEDIATE)
+            gen_load_immediate(program, $2.value);
+          else
+            gen_andb_instruction(program, $2.value, $2.value, $2.value, CG_DIRECT_ALL);
+
+          t_axe_label *l = newLabel(program);
+          ((t_cond_statement*)LDATA(getElementAt(condStack, 0)))->l_next = l;
+
+          /* if exp is false jump to next case */
+          gen_beq_instruction(program, l, 0);
+
+        } statements {
+
+          /* this instruction is reached if the exp has been evaluated to true */
+          gen_bt_instruction(program, ((t_cond_statement*)LDATA(getElementAt(condStack,0)))->l_end, 0);
+          
+          assignLabel(program, ((t_cond_statement*)LDATA(getElementAt(condStack, 0)))->l_next);
+        }
 ;
 
 default_statement : DEFAULT COLON {
-          ((t_switch_statement*)LDATA(getElementAt(switchStack, 0)))->default_label = assignNewLabel(program);
+          if(switchStack!=NULL) // I might be in the cond statement case
+            ((t_switch_statement*)LDATA(getElementAt(switchStack, 0)))->default_label = assignNewLabel(program);
 					} statements
 ;
 
@@ -561,6 +587,19 @@ break_statement: BREAK {
                   }
                 }
 ;
+
+cond_statement :  COND LBRACE {
+                      $1 = (t_cond_statement *)malloc(sizeof(t_cond_statement));
+                      $1->l_end = newLabel(program);
+                      condStack = addFirst(condStack, $1);
+                  } cond_block RBRACE {
+                      assignLabel(program, $1->l_end);
+                      condStack = removeFirst(condStack);
+                  }
+;
+
+cond_block : case_statements | case_statements default_statement;
+
 
 return_statement : RETURN
             {

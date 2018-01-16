@@ -79,7 +79,8 @@
      SWITCH = 305,
      DOLLAR = 306,
      AT = 307,
-     NOT = 308
+     COND = 308,
+     NOT = 309
    };
 #endif
 /* Tokens.  */
@@ -133,13 +134,14 @@
 #define SWITCH 305
 #define DOLLAR 306
 #define AT 307
-#define NOT 308
+#define COND 308
+#define NOT 309
 
 
 
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 103 "Acse.y"
+#line 105 "Acse.y"
 typedef union YYSTYPE {            
    int intval;
    char *svalue;
@@ -152,9 +154,10 @@ typedef union YYSTYPE {
    t_foreach_statement foreach_stmt;
    t_for_statement for_stmt;
    t_switch_statement *switch_stmt;
+   t_cond_statement *cond_stmt;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 158 "Acse.tab.h"
+#line 161 "Acse.tab.h"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
