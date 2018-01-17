@@ -122,6 +122,7 @@ struct ac {
    t_for_statement for_stmt;
    t_switch_statement *switch_stmt;
    t_cond_statement *cond_stmt;
+   t_map_statement map_stmt;
 } 
 /*=========================================================================
                                TOKENS 
@@ -141,6 +142,7 @@ struct ac {
 %token QMARK
 %token HAT
 %token IN
+%token ON AS
 
 %token <label> DO
 %token <while_stmt> WHILE
@@ -156,6 +158,7 @@ struct ac {
 %token <switch_stmt> SWITCH
 %token <label> DOLLAR AT
 %token <cond_stmt> COND
+%token <map_stmt> MAP
 
 %type <expr> exp
 %type <expr> assign_statement
@@ -288,6 +291,7 @@ control_statement : if_statement         { /* does nothing */ }
           | switch_statement { /* does nothing */ }
           | break_statement SEMI { /* does nothing */ }
           | cond_statement { /* does nothing */ }
+          | map_statement { /* does nothing */ }
 ;
 
 read_write_statement : read_statement  { /* does nothing */ }
@@ -685,7 +689,45 @@ cond_statement :  COND LBRACE {
 
 cond_block : case_statements | case_statements default_statement;
 
+map_statement: MAP IDENTIFIER ON IDENTIFIER AS {
+                t_axe_variable *array = getVariable(program, $4);
+                int cmp = getNewRegister(program);
+                $1.index = gen_load_immediate(program, 0);
+                $1.l_end = newLabel(program);
 
+                if(!array->isArray) exit(-1);
+
+                /* lookup the symbol table and fetch the register location
+                * associated with the IDENTIFIER $2. */
+                int elem = get_symbol_location(program, $2, 0);
+
+                $1.l_iter = assignNewLabel(program);
+
+                /* check if the index has reached the size of the array and jump to end */
+                gen_subi_instruction(program, cmp, $1.index, array->arraySize);
+                gen_beq_instruction(program, $1.l_end, 0);
+
+                /* load the value of array[i] into elem */
+                t_axe_expression idx = create_expression($1.index, REGISTER);
+                gen_addi_instruction(program, elem, loadArrayElement(program, $4, idx), 0);
+              
+              } code_block {
+
+                /* reload the location of elem */
+                int elem = get_symbol_location(program, $2, 0);
+                t_axe_expression idx = create_expression($1.index, REGISTER);
+
+                /* store the UPDATED value of elem into the array */
+                storeArrayElement(program, $4, idx, create_expression(elem, REGISTER));
+
+                gen_addi_instruction(program, $1.index, $1.index, 1);
+                gen_bt_instruction(program, $1.l_iter, 0);
+
+                assignLabel(program, $1.l_end);
+                free($2);
+                free($4);
+              }
+;
 return_statement : RETURN
             {
                /* insert an HALT instruction */
