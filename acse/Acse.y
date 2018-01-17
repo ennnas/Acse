@@ -94,6 +94,13 @@ t_list *switchStack = NULL;
 
 t_list *condStack = NULL;
 
+/* struct used for array comprehension */
+struct ac {
+  t_axe_label *l_cond;
+  t_axe_label *l_body;
+  int index;
+} ac;
+
 %}
 
 %expect 1
@@ -133,6 +140,7 @@ t_list *condStack = NULL;
 %token CASE DEFAULT BREAK 
 %token QMARK
 %token HAT
+%token IN
 
 %token <label> DO
 %token <while_stmt> WHILE
@@ -310,7 +318,83 @@ assign_statement : IDENTIFIER LSQUARE exp RSQUARE ASSIGN exp
 					$$ = create_expression($3.value, REGISTER);
 			   }
 			   free($1);
-            }
+            }/*
+            | IDENTIFIER ASSIGN {
+              ac.index_reg = gen_load_immediate(program, 0); 
+              ac.Lcond = newLabel(program); 
+              gen_bt_instruction(program, ac.Lcond, 0); 
+              ac.Lbody = assignNewLabel(program);
+
+            } LSQUARE exp {
+              t_axe_expression index_expr = create_expression(ac.index_reg, REGISTER);
+              storeArrayElement(program, $1, index_expr, $5); 
+              gen_addi_instruction(program, ac.index_reg, ac.index_reg, 1);
+
+            } FOR IDENTIFIER IN IDENTIFIER RSQUARE {
+              t_axe_variable *dest = getVariable(program, $1); 
+              t_axe_variable *iv = getVariable(program, $8); 
+              t_axe_variable *src = getVariable(program, $10);
+              if (!dest->isArray || iv->isArray || !src->isArray) exit(-1);
+              
+              t_axe_expression min_size = create_expression(dest->arraySize < src->arraySize ? dest->arraySize : src->arraySize, IMMEDIATE);
+              int iv_reg = get_symbol_location(program, $8, 0);
+              t_axe_expression index_expr = create_expression(ac.index_reg, REGISTER);
+
+              t_axe_label *Lend = newLabel(program);
+              assignLabel(program, ac.Lcond); 
+              t_axe_expression cmp = handle_binary_comparison(program, index_expr, min_size, _LT_); 
+              gen_beq_instruction(program, Lend, 0);
+              int elem = loadArrayElement(program, $10, index_expr); 
+              gen_addi_instruction(program, iv_reg, elem, 0);
+              gen_bt_instruction(program, ac.Lbody, 0); 
+              assignLabel(program, Lend);
+              free($1);
+              free($8);
+              free($10);
+            }*/
+         | IDENTIFIER ASSIGN {
+               /* Init the gloabal struct */
+               ac.l_cond = newLabel(program);
+               ac.l_body = newLabel(program);
+               ac.index = gen_load_immediate(program, 0);
+               
+
+               gen_bt_instruction(program, ac.l_cond, 0);
+
+               assignLabel(program, ac.l_body);
+             } LSQUARE exp {
+
+               /* $1[i] = exp_i */
+               storeArrayElement(program, $1, create_expression(ac.index, REGISTER), $5);
+               gen_addi_instruction(program, ac.index, ac.index, 1); 
+
+             } FOR IDENTIFIER IN IDENTIFIER RSQUARE {
+               t_axe_label *l_end = newLabel(program);
+
+               t_axe_variable *src = getVariable(program, $10);
+               t_axe_variable *dest = getVariable(program, $1);
+               
+               if(!src->isArray || !dest->isArray)
+                 exit(-1);
+
+
+               /* check if ac.index is equal to $10->arraySize and eventually finish */
+               t_axe_expression min_size = create_expression(dest->arraySize < src->arraySize ? dest->arraySize : src->arraySize, IMMEDIATE);
+               int iv_reg = get_symbol_location(program, $8, 0);
+               t_axe_expression index_expr = create_expression(ac.index, REGISTER);
+
+               assignLabel(program, ac.l_cond); 
+               t_axe_expression cmp = handle_binary_comparison(program, index_expr, min_size, _LT_); 
+               gen_beq_instruction(program, l_end, 0);
+               
+               int elem = loadArrayElement(program, $10, index_expr); 
+               gen_addi_instruction(program, iv_reg, elem, 0);
+               gen_bt_instruction(program, ac.l_body, 0); 
+               assignLabel(program, l_end);
+               free($1);
+               free($8);
+               free($10);
+             }
 ;
 
             
@@ -415,6 +499,7 @@ while_statement  : WHILE
 
                      /* fix the label `label_end' */
                      assignLabel(program, $1.label_end);
+
                   }
 ;
                   

@@ -285,24 +285,24 @@ static void yy_fatal_error YY_PROTO(( yyconst char msg[] ));
 	*yy_cp = '\0'; \
 	yy_c_buf_p = yy_cp;
 
-#define YY_NUM_RULES 64
-#define YY_END_OF_BUFFER 65
+#define YY_NUM_RULES 65
+#define YY_END_OF_BUFFER 66
 static yyconst short int yy_accept[130] =
     {   0,
-        0,    0,    6,    6,   65,   63,    3,    2,   63,   26,
+        0,    0,    6,    6,   66,   64,    3,    2,   64,   26,
        39,   23,   24,   15,   16,   21,   19,   38,   20,   22,
-       62,   18,   17,   28,   27,   29,   41,   40,   61,   13,
-       14,   42,   61,   61,   61,   61,   61,   61,   61,   61,
-       61,   61,   11,   25,   12,    6,    7,    8,    3,    1,
-       33,   36,    5,    4,   62,   30,   34,   32,    0,   35,
-       31,   61,   61,   61,   61,   61,   43,   61,   61,   61,
-       47,   61,   61,   61,   61,   61,   61,   37,    6,    7,
-        8,    9,    8,   10,    4,   60,   61,   61,   61,   61,
-       61,   61,   45,   48,   61,   61,   61,   61,   61,   61,
+       63,   18,   17,   28,   27,   29,   41,   40,   62,   13,
+       14,   42,   62,   62,   62,   62,   62,   62,   62,   62,
+       62,   62,   11,   25,   12,    6,    7,    8,    3,    1,
+       33,   36,    5,    4,   63,   30,   34,   32,    0,   35,
+       31,   62,   62,   62,   62,   62,   43,   62,   62,   62,
+       47,   61,   62,   62,   62,   62,   62,   37,    6,    7,
+        8,    9,    8,   10,    4,   60,   62,   62,   62,   62,
+       62,   62,   45,   48,   62,   62,   62,   62,   62,   62,
 
-       61,   56,   59,   61,   44,   53,   61,   51,   61,   61,
-       61,   61,   61,   57,   61,   61,   61,   61,   61,   49,
-       52,   61,   61,   50,   55,   54,   58,   46,    0
+       62,   56,   59,   62,   44,   53,   62,   51,   62,   62,
+       62,   62,   62,   57,   62,   62,   62,   62,   62,   49,
+       52,   62,   62,   50,   55,   54,   58,   46,    0
     } ;
 
 static yyconst int yy_ec[256] =
@@ -1026,29 +1026,34 @@ YY_RULE_SETUP
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 115 "Acse.lex"
-{ yylval.svalue=strdup(yytext); return IDENTIFIER; }
+#line 114 "Acse.lex"
+{ return IN; }
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
 #line 116 "Acse.lex"
-{ yylval.intval = atoi( yytext );
-                    return(NUMBER); }
+{ yylval.svalue=strdup(yytext); return IDENTIFIER; }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 119 "Acse.lex"
+#line 117 "Acse.lex"
+{ yylval.intval = atoi( yytext );
+                    return(NUMBER); }
+	YY_BREAK
+case 64:
+YY_RULE_SETUP
+#line 120 "Acse.lex"
 { yyerror("Error: unexpected token");
                     num_error++;
                     return (-1); /* invalid token */
                   }
 	YY_BREAK
-case 64:
+case 65:
 YY_RULE_SETUP
-#line 123 "Acse.lex"
+#line 124 "Acse.lex"
 ECHO;
 	YY_BREAK
-#line 1052 "lex.yy.c"
+#line 1057 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(comment):
 	yyterminate();
@@ -1935,4 +1940,4 @@ int main()
 	return 0;
 	}
 #endif
-#line 123 "Acse.lex"
+#line 124 "Acse.lex"

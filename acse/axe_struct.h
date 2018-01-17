@@ -155,7 +155,6 @@ typedef struct t_cond_statement {
   t_axe_label *l_next;
 } t_cond_statement;
 
-
 /* create a label */
 extern t_axe_label * alloc_label(int value);
 

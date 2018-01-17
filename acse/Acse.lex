@@ -111,6 +111,7 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
 "default"		  { return DEFAULT; }
 "cond"			  { return COND; }
 "=a="			  { return EQARRAY; }
+"in"			  { return IN; }
 
 {ID}              { yylval.svalue=strdup(yytext); return IDENTIFIER; }
 {DIGIT}+          { yylval.intval = atoi( yytext );
