@@ -1,0 +1,18 @@
+int x[3]; 
+int elem;
+int t;
+int sum;
+
+sum = 0;
+read(t); 
+// t = 1
+
+x[0]=2;
+x[1]=6;
+x[2]=13;
+
+reduce elem into sum 
+as [[ sum + t * elem ]]
+on x;
+
+write(sum);

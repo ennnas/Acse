@@ -123,6 +123,7 @@ struct ac {
    t_switch_statement *switch_stmt;
    t_cond_statement *cond_stmt;
    t_map_statement map_stmt;
+   t_reduce_statement reduce_stmt;
 } 
 /*=========================================================================
                                TOKENS 
@@ -143,6 +144,7 @@ struct ac {
 %token HAT
 %token IN
 %token ON AS
+%token INTO
 
 %token <label> DO
 %token <while_stmt> WHILE
@@ -159,6 +161,7 @@ struct ac {
 %token <label> DOLLAR AT
 %token <cond_stmt> COND
 %token <map_stmt> MAP
+%token <reduce_stmt> REDUCE
 
 %type <expr> exp
 %type <expr> assign_statement
@@ -292,6 +295,7 @@ control_statement : if_statement         { /* does nothing */ }
           | break_statement SEMI { /* does nothing */ }
           | cond_statement { /* does nothing */ }
           | map_statement { /* does nothing */ }
+          | reduce_statement SEMI{ /* does nothing */ }
 ;
 
 read_write_statement : read_statement  { /* does nothing */ }
@@ -322,40 +326,7 @@ assign_statement : IDENTIFIER LSQUARE exp RSQUARE ASSIGN exp
 					$$ = create_expression($3.value, REGISTER);
 			   }
 			   free($1);
-            }/*
-            | IDENTIFIER ASSIGN {
-              ac.index_reg = gen_load_immediate(program, 0); 
-              ac.Lcond = newLabel(program); 
-              gen_bt_instruction(program, ac.Lcond, 0); 
-              ac.Lbody = assignNewLabel(program);
-
-            } LSQUARE exp {
-              t_axe_expression index_expr = create_expression(ac.index_reg, REGISTER);
-              storeArrayElement(program, $1, index_expr, $5); 
-              gen_addi_instruction(program, ac.index_reg, ac.index_reg, 1);
-
-            } FOR IDENTIFIER IN IDENTIFIER RSQUARE {
-              t_axe_variable *dest = getVariable(program, $1); 
-              t_axe_variable *iv = getVariable(program, $8); 
-              t_axe_variable *src = getVariable(program, $10);
-              if (!dest->isArray || iv->isArray || !src->isArray) exit(-1);
-              
-              t_axe_expression min_size = create_expression(dest->arraySize < src->arraySize ? dest->arraySize : src->arraySize, IMMEDIATE);
-              int iv_reg = get_symbol_location(program, $8, 0);
-              t_axe_expression index_expr = create_expression(ac.index_reg, REGISTER);
-
-              t_axe_label *Lend = newLabel(program);
-              assignLabel(program, ac.Lcond); 
-              t_axe_expression cmp = handle_binary_comparison(program, index_expr, min_size, _LT_); 
-              gen_beq_instruction(program, Lend, 0);
-              int elem = loadArrayElement(program, $10, index_expr); 
-              gen_addi_instruction(program, iv_reg, elem, 0);
-              gen_bt_instruction(program, ac.Lbody, 0); 
-              assignLabel(program, Lend);
-              free($1);
-              free($8);
-              free($10);
-            }*/
+            }
          | IDENTIFIER ASSIGN {
                /* Init the gloabal struct */
                ac.l_cond = newLabel(program);
@@ -727,6 +698,54 @@ map_statement: MAP IDENTIFIER ON IDENTIFIER AS {
                 free($2);
                 free($4);
               }
+;
+
+reduce_statement :  REDUCE IDENTIFIER INTO IDENTIFIER {
+                      /* init reduce structure */
+                      $1.l_cond = newLabel(program);
+                      $1.l_end = newLabel(program);
+                      $1.counter = gen_load_immediate(program, 0);
+                      /* go to the vector and add the variable to the structure */
+                      gen_bt_instruction(program, $1.l_cond, 0);
+                      
+                      $1.l_exp = assignNewLabel(program);
+
+                    } AS LSQUARE LSQUARE exp RSQUARE RSQUARE {
+
+                      int res = get_symbol_location(program, $4, 0);
+                      /* update the current result with the new exp value */
+                      if($9.expression_type == IMMEDIATE)
+                        gen_addi_instruction(program, res, REG_0, $9.value);
+                      else
+                        gen_addi_instruction(program, res, $9.value, 0);
+
+                      /* update the counter and end if array size is reached */
+                      gen_addi_instruction(program, $1.counter, $1.counter, 1);
+                      
+                    } ON IDENTIFIER {
+                      assignLabel(program, $1.l_cond);
+                      t_axe_variable *array = getVariable(program, $14);
+                      if(!array->isArray) exit(-1);
+                      
+                      /* check if the counter has reached the array size and end */
+                      int cmp = getNewRegister(program);
+                      gen_subi_instruction(program, cmp, $1.counter, array->arraySize);
+                      gen_beq_instruction(program, $1.l_end, 0);
+
+                      /* load elem location */
+                      int elem = get_symbol_location(program, $2, 0);
+                      /* elem = array[counter] */
+                      t_axe_expression idx = create_expression($1.counter, REGISTER);
+                      gen_addi_instruction(program, elem, loadArrayElement(program, $14, idx), 0);
+
+                      /* jump to evaluating expression */
+                      gen_bt_instruction(program, $1.l_exp, 0);
+
+                      assignLabel(program, $1.l_end );
+                      free($2);
+                      free($4);
+                      free($14);
+                    }
 ;
 return_statement : RETURN
             {

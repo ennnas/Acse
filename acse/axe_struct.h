@@ -160,6 +160,14 @@ typedef struct t_map_statement {
   t_axe_label *l_end;
   int index;
 } t_map_statement;
+
+typedef struct t_reduce_statement {
+  t_axe_label *l_exp;
+  t_axe_label *l_cond;
+  t_axe_label *l_end;
+  int counter;
+} t_reduce_statement;
+
 /* create a label */
 extern t_axe_label * alloc_label(int value);
 

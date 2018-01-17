@@ -69,23 +69,25 @@
      IN = 295,
      ON = 296,
      AS = 297,
-     DO = 298,
-     WHILE = 299,
-     IF = 300,
-     ELSE = 301,
-     TYPE = 302,
-     IDENTIFIER = 303,
-     NUMBER = 304,
-     EVAL = 305,
-     UNLESS = 306,
-     FOREACH = 307,
-     FOR = 308,
-     SWITCH = 309,
-     DOLLAR = 310,
-     AT = 311,
-     COND = 312,
-     MAP = 313,
-     NOT = 314
+     INTO = 298,
+     DO = 299,
+     WHILE = 300,
+     IF = 301,
+     ELSE = 302,
+     TYPE = 303,
+     IDENTIFIER = 304,
+     NUMBER = 305,
+     EVAL = 306,
+     UNLESS = 307,
+     FOREACH = 308,
+     FOR = 309,
+     SWITCH = 310,
+     DOLLAR = 311,
+     AT = 312,
+     COND = 313,
+     MAP = 314,
+     REDUCE = 315,
+     NOT = 316
    };
 #endif
 /* Tokens.  */
@@ -129,23 +131,25 @@
 #define IN 295
 #define ON 296
 #define AS 297
-#define DO 298
-#define WHILE 299
-#define IF 300
-#define ELSE 301
-#define TYPE 302
-#define IDENTIFIER 303
-#define NUMBER 304
-#define EVAL 305
-#define UNLESS 306
-#define FOREACH 307
-#define FOR 308
-#define SWITCH 309
-#define DOLLAR 310
-#define AT 311
-#define COND 312
-#define MAP 313
-#define NOT 314
+#define INTO 298
+#define DO 299
+#define WHILE 300
+#define IF 301
+#define ELSE 302
+#define TYPE 303
+#define IDENTIFIER 304
+#define NUMBER 305
+#define EVAL 306
+#define UNLESS 307
+#define FOREACH 308
+#define FOR 309
+#define SWITCH 310
+#define DOLLAR 311
+#define AT 312
+#define COND 313
+#define MAP 314
+#define REDUCE 315
+#define NOT 316
 
 
 
@@ -166,9 +170,10 @@ typedef union YYSTYPE {
    t_switch_statement *switch_stmt;
    t_cond_statement *cond_stmt;
    t_map_statement map_stmt;
+   t_reduce_statement reduce_stmt;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 172 "Acse.tab.h"
+#line 177 "Acse.tab.h"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
