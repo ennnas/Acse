@@ -168,6 +168,11 @@ typedef struct t_reduce_statement {
   int counter;
 } t_reduce_statement;
 
+typedef struct t_axe_define {
+  char *id;
+  int val;
+} t_axe_define;
+
 /* create a label */
 extern t_axe_label * alloc_label(int value);
 

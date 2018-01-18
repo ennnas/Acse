@@ -94,6 +94,7 @@ t_list *switchStack = NULL;
 
 t_list *condStack = NULL;
 
+t_list *defines = NULL;
 /* struct used for array comprehension */
 struct ac {
   t_axe_label *l_cond;
@@ -145,6 +146,7 @@ struct ac {
 %token IN
 %token ON AS
 %token INTO
+%token DEFINE
 
 %token <label> DO
 %token <while_stmt> WHILE
@@ -200,7 +202,7 @@ struct ac {
       2. A list of instructions. (at least one instruction!).
  * When the rule associated with the non-terminal `program' is executed,
  * the parser notify it to the `program' singleton instance. */
-program  : var_declarations statements
+program  : def_declarations var_declarations statements
          {
             /* Notify the end of the program. Once called
              * the function `set_end_Program' - if necessary -
@@ -212,6 +214,20 @@ program  : var_declarations statements
             YYACCEPT;
          }
 ;
+
+def_declarations : def_declarations def_declaration {/* does nothing*/} 
+                  | /* empty */ { /* does nothing */ };
+
+def_declaration:  DEFINE IDENTIFIER NUMBER{
+
+            t_axe_define *def = malloc(sizeof(t_axe_define));
+            def->id = strdup($2);
+            def->val = $3;
+
+            defines = addFirst(defines, def);
+            }
+;
+
 
 var_declarations : var_declarations var_declaration   { /* does nothing */ }
                  | /* empty */                        { /* does nothing */ }
@@ -262,6 +278,8 @@ declaration : IDENTIFIER ASSIGN NUMBER
                if ($$ == NULL)
                   notifyError(AXE_OUT_OF_MEMORY);
             }
+            | IDENTIFIER ASSIGN IDENTIFIER
+            | IDENTIFIER LSQUARE IDENTIFIER RSQUARE
            
 ;
 

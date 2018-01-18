@@ -1,0 +1,5 @@
+define FOO 4
+define BAR 5
+
+write(FOO*BAR);
+
